@@ -64,16 +64,16 @@ conti_table2 = pd.crosstab(data['department_name'], data['STATUS'], normalize='i
 print(conti_table2)
 print("=" * 50)
 
-data['job_title'].value_counts().head(10).plot(
-    kind='bar',
-    figsize=(10, 5),
-    title='Top 10 Job Titles'
-)
+# data['job_title'].value_counts().head(10).plot(
+#     kind='bar',
+#     figsize=(10, 5),
+#     title='Top 10 Job Titles'
+# )
 
-plt.xlabel('Job Title')
-plt.ylabel('Number of Records')
-plt.xticks(rotation=45, ha='right')
-plt.show()
+# plt.xlabel('Job Title')
+# plt.ylabel('Number of Records')
+# plt.xticks(rotation=45, ha='right')
+# plt.show()
 # pada department, department "Produce" memiliki termination rate yang lebih tinggi dibandingkan department dengan jumlah anggota besar lainnya
 
 print("=" * 50)
@@ -152,3 +152,23 @@ print(terminated_employee.sort_values(
     ['EmployeeID','STATUS_YEAR']
 )[['EmployeeID', 'STATUS_YEAR', 'STATUS']].head(30))
 print("=" * 50)
+
+terminated = data[data['STATUS'] == 'TERMINATED']
+previous_status = []
+
+for _, row in terminated.iterrows():
+    employee_id = row['EmployeeID']
+    termination_year = row['STATUS_YEAR']
+
+    previous_year = data[
+        (data['EmployeeID'] == employee_id) &
+        (data['STATUS_YEAR'] == termination_year - 1)
+    ]
+
+    if not previous_year.empty:
+        status = previous_year['STATUS'].iloc[0]
+        previous_status.append(status)
+
+print(pd.Series(previous_status).value_counts())
+
+# 1338 employee memiliki pola ACTIVE (tahun T) -> TERMINATED (tahun T+1)
