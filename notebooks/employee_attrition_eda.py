@@ -63,6 +63,17 @@ print("=" * 50)
 conti_table2 = pd.crosstab(data['department_name'], data['STATUS'], normalize='index')
 print(conti_table2)
 print("=" * 50)
+
+data['job_title'].value_counts().head(10).plot(
+    kind='bar',
+    figsize=(10, 5),
+    title='Top 10 Job Titles'
+)
+
+plt.xlabel('Job Title')
+plt.ylabel('Number of Records')
+plt.xticks(rotation=45, ha='right')
+plt.show()
 # pada department, department "Produce" memiliki termination rate yang lebih tinggi dibandingkan department dengan jumlah anggota besar lainnya
 
 print("=" * 50)
@@ -119,3 +130,25 @@ print(conti_table5)
 print("=" * 50)
 # pada length of service group, kelompok "10-14 tahun" memiliki termination rate paling tinggi dibandingkan kelompok lainnya
 # sebenarnya, kelompok "20+ tahun" memiliki termination rate tertinggi, tetapi sample datanya hanya 4000, dibandingkan dengan kelompok lain yang samplenya sedikit lebih tinggi
+
+print('=' * 50)
+print(data['STATUS_YEAR'].value_counts())
+print("=" * 50)
+
+print("=" * 50)
+conti_table5 = pd.crosstab(data['STATUS_YEAR'], data['STATUS'])
+print(conti_table5)
+
+print("=" * 50)
+print(data.sort_values(['EmployeeID','STATUS_YEAR'])[
+    ['EmployeeID', 'STATUS_YEAR', 'STATUS']
+].head(30))
+print("=" * 50)
+
+print("=" * 50)
+terminated_employee = data[data['STATUS'] == 'TERMINATED']
+
+print(terminated_employee.sort_values(
+    ['EmployeeID','STATUS_YEAR']
+)[['EmployeeID', 'STATUS_YEAR', 'STATUS']].head(30))
+print("=" * 50)
