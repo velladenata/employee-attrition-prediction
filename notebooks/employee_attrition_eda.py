@@ -154,7 +154,7 @@ print(terminated_employee.sort_values(
 print("=" * 50)
 
 terminated = data[data['STATUS'] == 'TERMINATED']
-previous_status = []
+previous_pairs = []
 
 for _, row in terminated.iterrows():
     employee_id = row['EmployeeID']
@@ -166,9 +166,51 @@ for _, row in terminated.iterrows():
     ]
 
     if not previous_year.empty:
-        status = previous_year['STATUS'].iloc[0]
-        previous_status.append(status)
+        previous_pairs.append((employee_id, termination_year))
 
-print(pd.Series(previous_status).value_counts())
+previous_pairs = set(previous_pairs)
+
+# print(pd.Series(previous_pairs).value_counts())
 
 # 1338 employee memiliki pola ACTIVE (tahun T) -> TERMINATED (tahun T+1)
+
+active = data[data['STATUS'] == 'ACTIVE']
+next_pairs = []
+
+for _, row in active.iterrows():
+    employee_id = row['EmployeeID']
+    active_year = row['STATUS_YEAR']
+
+    next_year = data[
+        (data['EmployeeID'] == employee_id) &
+        (data['STATUS_YEAR'] == active_year + 1)
+    ]
+
+    if not next_year.empty:
+        status = next_year['STATUS'].iloc[0]
+
+        if status == 'TERMINATED':
+            next_pairs.append((employee_id, active_year + 1))
+
+next_pairs = set(next_pairs)
+
+missing_pairs = previous_pairs - next_pairs
+print(missing_pairs)
+
+# print(pd.Series(next_status).value_counts())
+
+print(len(previous_pairs))
+print(len(next_pairs))
+
+# terdapat selisih 4 employee pada employee yang ACTIVE (tahun t) --> TERMINATED (tahun T + 1)
+
+missing_employee_id = [employee_id for employee_id, year in missing_pairs]
+
+missing = data[data['EmployeeID'].isin(missing_employee_id)]
+
+print(missing[['EmployeeID', 'STATUS', 'STATUS_YEAR']].sort_values(
+    ['EmployeeID', 'STATUS_YEAR']
+))
+
+# setelah ditelusuri data tiap employee, ternyata terdapat duplicate data employee pada tahun yang sama.
+# contoh : employee ID "3008" muncul 2x STATUS_YEAR 2007
