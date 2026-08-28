@@ -203,6 +203,7 @@ print(len(previous_pairs))
 print(len(next_pairs))
 
 # terdapat selisih 4 employee pada employee yang ACTIVE (tahun t) --> TERMINATED (tahun T + 1)
+# employee id : 3008, 3401, 7007, 7023
 
 missing_employee_id = [employee_id for employee_id, year in missing_pairs]
 
@@ -214,3 +215,12 @@ print(missing[['EmployeeID', 'STATUS', 'STATUS_YEAR']].sort_values(
 
 # setelah ditelusuri data tiap employee, ternyata terdapat duplicate data employee pada tahun yang sama.
 # contoh : employee ID "3008" muncul 2x STATUS_YEAR 2007
+
+duplicates = missing[
+    missing.duplicated(
+        subset=['EmployeeID', 'STATUS_YEAR'],
+        keep=False
+    )
+]
+
+print(missing[missing['EmployeeID'] == 7023].T.to_string())
