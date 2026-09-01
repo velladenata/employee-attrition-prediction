@@ -223,4 +223,31 @@ duplicates = missing[
     )
 ]
 
-print(missing[missing['EmployeeID'] == 7023].T.to_string())
+# print(missing[missing['EmployeeID'] == 7023].T.to_string())
+
+print(data['recorddate_key'].value_counts().head(30))
+print(data['recorddate_key'].nunique())
+
+print("=" * 50)
+conti_table6 = pd.crosstab(data['recorddate_key'], data['STATUS'])
+print(conti_table6)
+print("=" * 50)
+
+terminated = data[data['STATUS'] == 'TERMINATED']
+
+print(
+    terminated[
+        terminated['recorddate_key'].str.startswith('12/31')
+        ][['EmployeeID', 'recorddate_key', 'STATUS']]
+)
+
+active = data[data['STATUS'] == 'ACTIVE']
+
+print(
+    active[
+        ~active['recorddate_key'].str.startswith('12/31')
+    ][['EmployeeID', 'recorddate_key', 'STATUS']]
+)
+
+# record date pada waktu tertentu (awal/tengah tahun) merupakan catatan ketika employee mengalami termination
+# record date pada waktu akhir tahun menunjukkan data employee yang masih 'ACTIVE'
