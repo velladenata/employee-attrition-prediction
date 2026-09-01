@@ -251,3 +251,52 @@ print(
 
 # record date pada waktu tertentu (awal/tengah tahun) merupakan catatan ketika employee mengalami termination
 # record date pada waktu akhir tahun menunjukkan data employee yang masih 'ACTIVE'
+
+# print("=" * 50)
+# print(data['STATUS'].value_counts())
+# print("=" * 50)
+
+# print("=" * 50)
+prediction_point = data[
+    (data['STATUS'] == 'ACTIVE') & 
+    (data['recorddate_key'].str.startswith('12/31'))
+]
+
+# print(prediction_point[['EmployeeID', 'recorddate_key', 'STATUS']])
+# print("=" * 50)
+
+# print("=" * 50)
+# next_status = []
+
+# for _, row in prediction_point.iterrows():
+#     employee_id = row['EmployeeID']
+#     prediction_year = row['STATUS_YEAR']
+
+#     next_year = data[
+#         (data['EmployeeID'] == employee_id) &
+#         (data['STATUS_YEAR'] == prediction_year + 1)
+#     ]
+
+#     if not next_year.empty: 
+#         status = next_year['STATUS'].iloc[0]
+#         next_status.append((employee_id, prediction_year, status))
+
+# print(next_status)
+# print("=" * 50)
+
+print("=" * 50)
+prediction_point = prediction_point.copy()
+
+prediction_point['target_year'] = prediction_point['STATUS_YEAR'] + 1
+next_data = data[['EmployeeID', 'STATUS_YEAR', 'STATUS']]
+
+result = prediction_point.merge(
+    next_data,
+    left_on=['EmployeeID', 'target_year'],
+    right_on=['EmployeeID', 'STATUS_YEAR'],
+    how='left'
+)
+
+print(result)
+
+print("=" * 50)
