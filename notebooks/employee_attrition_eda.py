@@ -285,10 +285,43 @@ prediction_point = data[
 # print("=" * 50)
 
 print("=" * 50)
-prediction_point = prediction_point.copy()
+
+prediction_point = data[
+    (data['STATUS'] == 'ACTIVE') &
+    (data['recorddate_key'].str.startswith('12/31'))
+].copy()
+
+print("=" * 50)
+print("Jumlah Prediction Point: ", len(prediction_point))
+print("=" * 50)
+
+print(prediction_point['STATUS_YEAR'].value_counts())
+print("=" * 50)
+
+year_counts = prediction_point['STATUS_YEAR'].value_counts().sort_index()
+
+plt.bar(
+    year_counts.index,
+    year_counts.values,
+    color='purple'
+)
+
+plt.title('Prediction Point per Year')
+plt.xlabel('Year')
+plt.ylabel('Number of Prediction Point')
+
+plt.show()
 
 prediction_point['target_year'] = prediction_point['STATUS_YEAR'] + 1
-next_data = data[['EmployeeID', 'STATUS_YEAR', 'STATUS']]
+print(
+    prediction_point[['EmployeeID', 'STATUS_YEAR', 'target_year']].head(20)
+)
+
+print("=" * 50)
+
+next_data = data[
+    ['EmployeeID', 'STATUS_YEAR', 'STATUS', 'recorddate_key']
+].copy()
 
 result = prediction_point.merge(
     next_data,
@@ -297,6 +330,44 @@ result = prediction_point.merge(
     how='left'
 )
 
-print(result)
+print(
+    result[
+        result['STATUS_y'] == 'TERMINATED'
+    ][
+        ['EmployeeID', 'STATUS_YEAR_x', 'target_year', 'STATUS_y', 'recorddate_key_y']
+    ].head(20).to_string(index=False)
+)
 
 print("=" * 50)
+duplicate = result[
+    result.duplicated(
+        subset=['EmployeeID', 'STATUS_YEAR_x'],
+        keep=False
+    )
+]
+
+print(
+    duplicate[
+        ['EmployeeID', 'STATUS_YEAR_x', 'target_year', 'STATUS_y', 'recorddate_key_y']
+    ].sort_values(['EmployeeID', 'STATUS_YEAR_x']).head(30).to_string(index=False)
+)
+
+print("=" * 50)
+result['termination_flag'] = result['STATUS_y'] == 'TERMINATED'
+
+print(
+    result[
+        ['EmployeeID', 'STATUS_YEAR_x', 'target_year', 'STATUS_y', 'termination_flag']
+    ].tail(20).to_string(index=False)
+)
+
+group = result.groupby(['EmployeeID', 'STATUS_YEAR_x'])
+
+target_check = group['termination_flag'].any()
+
+print("=" * 50)
+print(
+    target_check.loc[
+        [(3008, 2006),(3401,2007), (7007, 2008), (7023, 2013)]
+    ]
+)
