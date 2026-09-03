@@ -354,6 +354,8 @@ print(
 
 print("=" * 50)
 result['termination_flag'] = result['STATUS_y'] == 'TERMINATED'
+result['termination_flag'] = result['termination_flag'].astype("boolean")
+result.loc[result['STATUS_y'].isna(), 'termination_flag'] = np.nan
 
 print(
     result[
@@ -361,13 +363,57 @@ print(
     ].tail(20).to_string(index=False)
 )
 
-group = result.groupby(['EmployeeID', 'STATUS_YEAR_x'])
+target_check = (
+    result
+    .groupby(['EmployeeID', 'STATUS_YEAR_x'])['termination_flag']
+    .max()
+    .reset_index()
+)
 
-target_check = group['termination_flag'].any()
+target_check.rename(
+    columns={'termination_flag':'target'}, 
+    inplace=True
+)
+
+print("=" * 50)
+print(target_check['target'].value_counts(dropna=False))
+
+print('=' * 50)
+
+final_data = prediction_point.merge(
+    target_check,
+    left_on=['EmployeeID', 'STATUS_YEAR'],
+    right_on=['EmployeeID', 'STATUS_YEAR_x'],
+    how='left'
+)
+
+print(final_data[['EmployeeID', 'STATUS_YEAR', 'target']].head(20))
+print(final_data.shape)
+
+print("=" * 50)
+print(final_data['target'].value_counts(dropna=False))
+
+# print("=" * 50)
+# print(final_data.columns.to_list())
+# print(final_data[['STATUS_YEAR', 'STATUS_YEAR_x']].head(20))
 
 print("=" * 50)
 print(
-    target_check.loc[
-        [(3008, 2006),(3401,2007), (7007, 2008), (7023, 2013)]
-    ]
+    result[
+        result['STATUS_YEAR_x'] == 2015
+    ][
+        'termination_flag'
+    ].value_counts(dropna=False)
+)
+
+print("=" * 50)
+missing_target = target_check[
+    (target_check['target'].isna()) & 
+    (target_check['STATUS_YEAR_x'] != 2015)
+]
+
+print(
+    missing_target[
+        ['EmployeeID', 'STATUS_YEAR_x', 'target']
+    ].to_string(index=False)
 )
