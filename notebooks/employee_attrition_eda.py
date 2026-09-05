@@ -417,3 +417,13 @@ print(
         ['EmployeeID', 'STATUS_YEAR_x', 'target']
     ].to_string(index=False)
 )
+
+print("=" * 50)
+
+print(
+    result[
+        result['EmployeeID'].isin(missing_target['EmployeeID'])
+    ][
+        ['EmployeeID', 'STATUS_YEAR_x', 'target_year', 'STATUS_y', 'recorddate_key_y', 'termination_flag']
+    ].sort_values(['EmployeeID', 'target_year'])
+)
